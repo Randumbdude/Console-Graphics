@@ -5,6 +5,9 @@
 #include <thread>
 #include "Graphics.h"
 
+HWND console = GetConsoleWindow();
+HDC dc;
+
 void showConsoleCursor(bool showCursor)
 {
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -32,19 +35,17 @@ void disableScrollBars() {
 
 void Graphics::start()
 {
-	this->isRunning = true;
-	HWND console = GetConsoleWindow();
-	while (this->isRunning) {
 
+	this->isRunning = true;
+	do {
 		showConsoleCursor(false);
 		disableScrollBars();
 		disableQuickEdit();
-
-		HDC dc = GetDC(console);
+		dc = GetDC(console);
 		if (!this->render) break;
-		else this->render(dc);
+		this->render(dc);
 		ReleaseDC(console, dc);
-	}
+	} while (this->isRunning);
 }
 
 void Graphics::stop()
@@ -52,14 +53,16 @@ void Graphics::stop()
 	this->isRunning = false;
 }
 
-void drawRect(HDC hdc, int x, int y, int width, int height, COLORREF color) {
+void drawRect(int x, int y, int width, int height, COLORREF color) {
+
+
 	int pixelX = x;
 	int pixelY = y;
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++)
 		{
-			SetPixel(hdc, pixelX, pixelY, color);
+			SetPixel(dc, pixelX, pixelY, color);
 			pixelX += 1;
 		}
 		pixelY += 1;
@@ -67,7 +70,7 @@ void drawRect(HDC hdc, int x, int y, int width, int height, COLORREF color) {
 	}
 }
 
-void drawSpiral(HDC dc, int x, int y, int spread, COLORREF color) {
+void drawSwirl(int x, int y, int spread, COLORREF color) {
 	int pixel = x;
 
 	//Draw pixels
@@ -78,7 +81,7 @@ void drawSpiral(HDC dc, int x, int y, int spread, COLORREF color) {
 	}
 }
 
-void drawCircle(HDC dc, int x, int y, int r, COLORREF color)
+void drawCircle(int x, int y, int r, COLORREF color)
 {
 	int tmpX, tmpY, lastX, lastY;
 	lastX = lastY = 0;
@@ -98,7 +101,7 @@ void drawCircle(HDC dc, int x, int y, int r, COLORREF color)
 	}
 }
 
-void drawFilledCircle(HDC dc, int x, int y, int r, COLORREF color)
+void drawFilledCircle(int x, int y, int r, COLORREF color)
 {
 	auto start = std::chrono::system_clock::now();
 	// Some computation here
@@ -131,7 +134,7 @@ void drawFilledCircle(HDC dc, int x, int y, int r, COLORREF color)
 	std::cout << "Done! elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
 }
 
-void drawline(HDC dc, int x0, int y0, int x1, int y1, COLORREF color)
+void drawline(int x0, int y0, int x1, int y1, COLORREF color)
 {
 	int dx, dy, p, x, y;
 
